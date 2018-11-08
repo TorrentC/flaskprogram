@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+    <div class="page-header"><h1>选课结果</h1></div>
+    <table class="table">
+          <thead>
+            <tr>
+              <th>学号</th>
+              <th>姓名</th>
+              <th>课程</th></tr>
+          </thead>
+          <tbody>
+            <tr class="success">
+              <td>{{ student.number }}</td>
+              <td>{{ student.name }}</td>
+              {% for c in student.classes %}
+                  <td>{{ c.name }}</td>
+              {% endfor %}
+
+            </tr>
+          </tbody>
+    </table>
+
+
+    <div style="margin-top: 20px">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                  <th>课程名称</th>
+                  <th>容量</th>
+                  <th>已选人数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in student.classes %}
+                    <tr>
+                      <td>{{ c.name }}</td>
+                      <td>{{ c.capacity }}</td>
+                      <td>{{ c.students.count() }}</td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+
+{% endblock %}
