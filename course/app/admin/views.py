@@ -3,15 +3,18 @@ from ..models import Student
 from flask import render_template, send_from_directory
 from datetime import datetime
 import xlrd, xlsxwriter, os
+from flask_login import login_required
 
 
 @admin.route('/')
+@login_required
 def info():
     students = Student.query.all()
     return render_template('admin/info.html', students=students, current_time=datetime.utcnow())
 
 
 @admin.route('/down')
+@login_required
 def down():
     import os
     dirs = os.path.dirname(os.path.realpath(__name__))

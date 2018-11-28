@@ -3,8 +3,9 @@ from flask import render_template, flash, redirect, url_for, session
 from datetime import datetime
 from .forms import LoginForm, ChooseForm
 from ..models import User, Student, Class
-from .. import db
 from wtforms import BooleanField, SubmitField
+from flask_login import login_user, current_user, login_required
+from .. import db
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -19,41 +20,29 @@ def login():
             flash('学号或姓名错误！！！')
             return redirect(url_for('.login'))
 
-        # 登录成功，设置session
-        session['info'] = [number, name]
-
         # 检测用户是否第一次登录
         student = Student.query.filter_by(number=number, name=name).first()
         if student is None:
-            # 第一次登录，写入students表，进行选课操作。
-            student = Student(name=name, number=number)
+            student = Student(number=number, name=name)
             db.session.add(student)
-            return redirect(url_for('.choose'))
+            student = Student.query.filter_by(number=number, name=name).first()
 
-            # 再次登录，判断是否选课
-        elif not student.classes.all():
-            return redirect(url_for('.choose'))
-
-        else:
-            # 其他情况，直接查看选择结果
+        login_user(student)
+        # 第一次登录，写入students表，进行选课操作。
+        if current_user.checked:
             return redirect(url_for('.detail'))
+        else:
+            return redirect(url_for('.choose'))
+
     return render_template('main/index.html', current_time=datetime.utcnow(), form=form)
 
 
 @main.route('/choose', methods=['GET', 'POST'])
+@login_required
 def choose():
-    # 使用session认证，后期改为装饰器
-    info = session.get('info')
-    if info is None:
-        flash('you must login first!!!')
-        return redirect(url_for('main.login'))
-
-    # 从students表中选出对象，并开始选课
-    number, student_name = info
-    student = Student.query.filter_by(number=number).first()
 
     # 判断学生是否已选课, 选过直接跳到detail中
-    if student.classes.all():
+    if current_user.checked:
         return redirect(url_for('.detail'))
 
     # 使用setter从classes表中动态设置form字段, (和学生选课数对比，动态显示选项)
@@ -83,26 +72,20 @@ def choose():
                 # 从classes表中选出表单中勾选的数据
                 if value:
                     c_obj = Class.query.filter_by(name=name).first()
-                    student.classes.append(c_obj)
+                    current_user.classes.append(c_obj)
+        # 设置表单填写标志
+        current_user.checked = True
         return redirect(url_for('.detail'))
 
-    return render_template('main/choose.html', number=number, name=student_name, form=form, current_time=datetime.utcnow(), classes=classes)
+    return render_template('main/choose.html', number=current_user.number, name=current_user.name, form=form, current_time=datetime.utcnow(), classes=classes)
 
 
 @main.route('/detail')
+@login_required
 def detail():
-    # 使用session认证，后期改为装饰器
-    info = session.get('info')
-    if info is None:
-        flash('you must login first!!!')
-        return redirect(url_for('main.login'))
-
-    # 从students表中获取数据，展示
-    number, student_name = info
-    student = Student.query.filter_by(number=number).first()
 
     # 判断学生是否已选课, 没有选则跳到choose中
-    if not student.classes.all():
+    if not current_user.checked:
         return redirect(url_for('.choose'))
-    return render_template('main/detail.html', student=student, current_time=datetime.utcnow())
+    return render_template('main/detail.html', student=current_user, current_time=datetime.utcnow())
 
