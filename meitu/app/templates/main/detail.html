@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+
+{% block page_content %}
+    <div class="page-header">
+        <h1 class="text-center">{{ title }}</h1>
+        <span style="display: none">{{ image.order }}</span>
+    </div>
+    <img src="{{ url_for('static', filename=image.path) }}" alt="">
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $('img').click(function () {
+            $.post('/ajax', {'order': Number($('span').text())+1, 'title': $('h1').text()}, function (data) {
+                if (data['data'] == 'no'){
+                    alert('没有下一张了');
+                    return;
+                };
+                var order = data['order'];
+                var path = data['path'];
+                $('span').text(order);
+                $('img').attr('src', path);
+            });
+        });
+    </script>
+{% endblock %}
+

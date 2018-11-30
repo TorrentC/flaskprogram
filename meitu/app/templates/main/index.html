@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% import '_macros.html' as macros %}
+
+
+
+{% block page_content %}
+    <div class="page-header">
+        <h1 class="text-center">Meitu Search</h1>
+        
+    </div>
+    <div>
+        <form class="bs-example bs-example-form" role="form" method="post" action="/search">
+            <div class="row">
+                <div class="col-lg-offset-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" required="required">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">Go!</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+            </div><!-- /.row -->
+        </form>
+    </div>
+    <br>
+    <div id="part">
+        {% for theme in themes %}
+            <a href="{{ url_for('.detail', title=theme.title, order=theme.images[0].order) }}" target="_blank">
+                            <h4>{{ theme.title }}</h4>
+            </a>
+            <div class="row">
+                {% for image in theme.images[:4] %}
+                    <div class="col-md-3" style="margin-bottom: 20px">
+                        <a href="{{ url_for('.detail', title=theme.title, order=image.order) }}" target="_blank">
+                            <img src="{{ url_for('static', filename=image.path)}}" alt="">
+
+                        </a>
+                    </div>
+                {% endfor %}
+
+            </div>
+            <hr>
+            <br>
+        {% endfor %}
+
+    </div>
+    {% if pagination %}
+    <div class="center-block">
+        <nav style="text-align: center">
+            {{ macros.pagination_widget(pagination, '.index') }}
+        </nav>
+    </div>
+
+    {% endif %}
+{% endblock %}
+
+
+

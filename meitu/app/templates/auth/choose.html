@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block page_content %}
+    <div class="page-header">
+    <h1>欢迎 {{ name }}</h1>
+    <p class="text-right"><b>can only choose two</b></p>
+    </div>
+    <div>
+        {{ wtf.quick_form(form) }}
+    </div>
+    <div style="margin-top: 20px">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                  <th>课程名称</th>
+                  <th>容量</th>
+                  <th>已选人数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in classes %}
+                    <tr>
+                      <td>{{ c.name }}</td>
+                      <td>{{ c.capacity }}</td>
+                      <td>{{ c.students.count() }}</td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
